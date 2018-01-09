@@ -7,12 +7,27 @@
 //
 
 import UIKit
+import SwiftyJSON
+
 /**
     Colors are assigned to view references in code as I find it a better practice than to hardcode it in a storyboard (although there are some defined there for ease of storyboard element visualization). Starting from iOS 11 one can use Color Assets, and it'd be the case not for the backwards compability with iOS 10. Colors are declared in a file called Colors.swift inside the common folder.
  **/
 
+typealias Pagination = (limit: Int, offset: Int)
+
 class ViewController: UIViewController {
 
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
+    fileprivate let baseUrl = "https://integration.upsales.com/api/v2/accounts?token=fab2dd8eb69dcdc3d108c7e7bfa6c4932fe69b06ba4cfe4c8cebe45d08a5b0a2&limit=%d&offset=%d"
+    fileprivate var network : CoreNetwork!
+    fileprivate var companies : [Company]?
+    fileprivate var pagination = Pagination(10,0)
+    fileprivate var totalCount = 0
+    fileprivate var downloadingNetworkData = true
+    
     @IBOutlet var companiesHeaderView: UIView! {
         didSet {
             companiesHeaderView.backgroundColor = UIColor.baseBackground()
@@ -21,7 +36,6 @@ class ViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView! {
         didSet {
             tableView.register(UINib(nibName: "CompanyView", bundle: nil), forCellReuseIdentifier: "CompanyViewCell")
-            tableView.bounces = false
             tableView.separatorStyle = .none
             tableView.tableHeaderView = companiesHeaderView
         }
@@ -30,21 +44,65 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        tableView.beginInfiniteScroll(true)
+        
         view.backgroundColor = UIColor.baseBackground()
+        network = CoreNetwork(vController: self, url: String(format: baseUrl, pagination.limit, pagination.offset), success: successLoading, in_error:
+            { error in
+                
+            self.downloadingNetworkData = false
+            self.tableView.finishInfiniteScroll()
+                
+                
+            })
+        network.fetchData()
         
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
+    func successLoading(json: JSON) {
+        
+        if json["data"].array != nil && json["data"].arrayValue.count > 0 && json["metadata"].exists() {
+            
+            var companies = [Company]()
+            
+            for company in json["data"].arrayValue {
+                if let company = CompanyView.createCompany(company) {
+                    companies.append(company)
+                }
+            }
+            
+            //If we have actual valid elements
+            if companies.count > 0 {
+                
+                //the actual elements presented on the list might not sum up to the total count in case required properties of the serialized content aren't present and are therefore thrown away (from the createCompany invocation above)
+                totalCount = json["metadata"]["total"].int ?? 0
+                
+                if pagination.offset >= pagination.limit {
+                    self.companies?.append(contentsOf: companies)
+                } else {
+                    self.companies = companies
+                }
+                
+                //sort elements by name ascending (I couldn't find anything  in the documentation to this directly from the network request)
+                self.companies?.sort(by: { $0.name.localizedCaseInsensitiveCompare($1.name) == ComparisonResult.orderedAscending })
 
+                self.tableView.reloadData()
+            }
+            
+        }
+        
+        downloadingNetworkData = false
+        self.tableView.finishInfiniteScroll()
+        
+
+    }
+    
 
 }
 
 extension ViewController : UITableViewDelegate, UITableViewDataSource {
     
-    // MARK : UITableViewDataSource method implementation
+    // MARK : UITableViewDataSource
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -54,13 +112,16 @@ extension ViewController : UITableViewDelegate, UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CompanyViewCell", for: indexPath) as! CompanyView
         cell.backgroundColor = UIColor.white
         
-        cell.companyNameLabel.text  = "Label Title"
-        cell.userNameLabel.text = "Description"
+        //there's never a nil scenario here
+        cell.companyNameLabel.text  = companies![indexPath.row].name
+        cell.userNameLabel.text = companies![indexPath.row].user
+        
+        
         return cell
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 20
+        return companies?.count ?? 0
     }
     
     
@@ -68,12 +129,12 @@ extension ViewController : UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let header = self.tableView.dequeueReusableCell(withIdentifier: "CompanyNumberFixedHeader") as! CompanyNumberFixedHeaderView
-        
+        header.numberLabel.text = "\(totalCount) companies"
         return header
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UITableViewAutomaticDimension
+        return 65
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -81,13 +142,40 @@ extension ViewController : UITableViewDelegate, UITableViewDataSource {
 
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // Nothing for now
+    
+    // MARK : ScrollViewDelegate
+    
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+       
     }
     
-    func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
-        // Nothing for now
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
+        if (scrollView.contentOffset.y<=0) {
+            scrollView.contentOffset = CGPoint.zero
+        }
+        
+        if downloadingNetworkData {
+            return
+        }
+        
+        let  height = scrollView.frame.size.height
+        let contentYoffset = scrollView.contentOffset.y
+        let distanceFromBottom = scrollView.contentSize.height - contentYoffset
+        if distanceFromBottom < height {
+            if pagination.offset < totalCount {
+                pagination = Pagination(10, pagination.offset + 10)
+                network?.url = String(format: baseUrl, pagination.limit, pagination.offset)
+                
+                downloadingNetworkData = true
+                self.tableView.beginInfiniteScroll(true)
+                
+                network?.fetchData()
+            }
+            
+        }
     }
+    
 }
 
 class CompanyNumberFixedHeaderView : UITableViewCell {
