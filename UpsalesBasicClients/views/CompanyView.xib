@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13527"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="Roboto-Medium.ttf">
+            <string>Roboto-Medium</string>
+        </array>
+        <array key="Roboto-Regular.ttf">
+            <string>Roboto-Regular</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" rowHeight="57" id="zGZ-VM-Whi" customClass="CompanyView" customModule="UpsalesBasicClients" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="57"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="zGZ-VM-Whi" id="WfE-Y6-EE2">
+                <rect key="frame" x="0.0" y="0.0" width="375" height="57"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ged-f4-egp">
+                        <rect key="frame" x="16" y="11" width="343" height="19"/>
+                        <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="16"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="M1w-3B-eCi">
+                        <rect key="frame" x="16" y="30" width="343" height="15.5"/>
+                        <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="13"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="trailingMargin" secondItem="M1w-3B-eCi" secondAttribute="trailing" id="1wx-vd-TOw"/>
+                    <constraint firstItem="Ged-f4-egp" firstAttribute="leading" secondItem="WfE-Y6-EE2" secondAttribute="leadingMargin" id="Tfm-LC-an2"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="Ged-f4-egp" secondAttribute="trailing" id="bLg-6h-5tW"/>
+                    <constraint firstItem="M1w-3B-eCi" firstAttribute="top" secondItem="Ged-f4-egp" secondAttribute="bottom" id="eb7-V4-d4c"/>
+                    <constraint firstItem="Ged-f4-egp" firstAttribute="top" secondItem="WfE-Y6-EE2" secondAttribute="topMargin" id="gVw-Ms-26c"/>
+                    <constraint firstAttribute="bottomMargin" secondItem="M1w-3B-eCi" secondAttribute="bottom" id="tWg-mm-Rgw"/>
+                    <constraint firstItem="M1w-3B-eCi" firstAttribute="top" secondItem="Ged-f4-egp" secondAttribute="bottom" id="uPD-go-9V2"/>
+                    <constraint firstItem="M1w-3B-eCi" firstAttribute="leading" secondItem="WfE-Y6-EE2" secondAttribute="leadingMargin" id="v71-VX-JyO"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="companyNameLabel" destination="Ged-f4-egp" id="6Jl-kg-deE"/>
+                <outlet property="userNameLabel" destination="M1w-3B-eCi" id="eHf-qM-O5i"/>
+            </connections>
+            <point key="canvasLocation" x="33.5" y="60.5"/>
+        </tableViewCell>
+    </objects>
+</document>
